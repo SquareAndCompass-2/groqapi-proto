@@ -1,1 +1,1 @@
-# GroqAPI
+# groqapi-proto
