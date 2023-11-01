@@ -1,0 +1,22 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.globalstatsmanager.v1;
+
+import "google/api/annotations.proto";
+
+service GlobalStatsManagerService {
+  rpc GetGlobalStats(GetGlobalStatsRequest) returns (GetGlobalStatsResponse) {
+    option (google.api.http) = {get: "/v1/global_stats_manager/global_stats"};
+  }
+}
+
+message GetGlobalStatsRequest {}
+
+message GetGlobalStatsResponse {
+  uint32 total_requests_counter = 1;
+}

@@ -1,0 +1,59 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Shim Service
+// This is the inverse of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.inferencemanager.v1;
+
+import "google/protobuf/duration.proto";
+
+service InferenceResultService {
+  // returns the query at the the top of the priority queue
+  rpc GetResult(stream InferenceResultServiceGetResultRequest) returns (InferenceResultServiceGetResultResponse) {}
+}
+
+message InferenceResultServiceGetResultResponse {}
+
+message ProcessingStats {
+  // total number of tokens processed
+  uint32 tokens_processed = 1;
+
+  // time in millis it took to process the query tokens
+  google.protobuf.Duration process_time = 2;
+}
+
+
+message GenerationStats {
+  // total number of tokens generated
+  uint32 tokens_generated = 1;
+
+  // time in millis it took to generate the response tokens
+  google.protobuf.Duration generate_time = 2;
+}
+
+
+message InferenceResultServiceGetResultRequest {
+  // the newly generated token data
+  uint32 token = 1;
+  // the ID of the request
+  string request_id = 2;
+  // response address
+  string response_address = 3;
+
+  // Statistics about the initial processing
+  // Static per request once provided
+  // Optional - sent at most once per stream
+  ProcessingStats processing_stats = 4;
+
+  // Statistics about the inference generation
+  GenerationStats generation_stats = 5;
+
+  // True if generation is finished
+  bool generation_finished = 6;
+
+  // Model to use
+  string model_id = 7;
+}

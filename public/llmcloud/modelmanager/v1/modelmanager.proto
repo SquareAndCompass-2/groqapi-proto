@@ -1,0 +1,24 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.modelmanager.v1;
+
+import "google/api/annotations.proto";
+import "public/llmcloud/modelmanager/v1/model.proto";
+
+service ModelManagerService {
+  // lists all available models a client can select
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse) {
+    option (google.api.http) = {get: "/v1/model_manager/models"};
+  }
+}
+
+message ListModelsRequest {}
+
+message ListModelsResponse {
+  repeated Model models = 1;
+}

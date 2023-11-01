@@ -1,0 +1,54 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.modelmanager.v1;
+
+message ModelDetails {
+  // gpt, llama, bart, etc
+  string family = 1;
+
+  // 2 (e.g. for llama 2)
+  string version = 2;
+
+  // 7B, 13B, 70B, etc
+  string size = 3;
+
+  // the maximum sequence length of the model
+  uint32 sequence_length = 4;
+
+  // additional, opaque, field to disambiguate
+  string tag = 5;
+
+  // e.g. LLAMA 2 COMMUNITY LICENSE AGREEMENT
+  string license = 6;
+
+  // llama, codel lama
+  string name = 7;
+
+  // The entity that owns the model
+  string owner = 8;
+}
+
+message ModelMeta {
+  // unix timestamp in seconds for when the model was created
+  uint32 created = 1;
+}
+
+enum ModelStatus {
+  MODEL_STATUS_UNSPECIFIED = 0;
+  MODEL_STATUS_ACTIVE = 1;
+  MODEL_STATUS_INACTIVE = 2;
+}
+
+message Model {
+  // opaque unique identifier for the model
+  string id = 1;
+  ModelDetails details = 2;
+  ModelMeta meta = 3;
+  // is the model currently being served
+  ModelStatus status = 9;
+}
