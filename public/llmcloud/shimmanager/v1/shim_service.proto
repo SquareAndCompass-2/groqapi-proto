@@ -1,0 +1,48 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Shim Service
+// This is the inverse of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.shimmanager.v1;
+
+service ShimService {
+  // returns the query at the the top of the priority queue
+  rpc GetQuery(ShimServiceGetQueryRequest) returns (ShimServiceGetQueryResponse) {}
+}
+
+message ShimServiceGetQueryRequest {
+  // How many to return
+  uint32 num_requested = 1;
+}
+
+message Query {
+  // query to run the model on
+  repeated uint32 query = 1 [packed = true];
+  //string query = 1;
+  // a request ID indicating that this text completion request continues a
+  // prior one that responded with the passed ID. this is not required but
+  // should be specified by the client for better performance (avoids rebuilding
+  // the K/V cache).
+  string request_id = 2;
+  // the seed to use when generating tokens
+  uint32 seed = 3;
+  // the maximum amount of tokens to generate before terminating
+  uint32 max_tokens = 4;
+  // controls the randomness of the response
+  float temperature = 5;
+  // controls the top percentile of tokens that are eligible to be sampled
+  float top_p = 6;
+  // controls the top k most likely tokens that are eligible to be sampled
+  uint32 top_k = 7;
+  // a string that tracks the response address
+  string response_address = 8;
+  // the model to use
+  string model_id = 9;
+}
+
+message ShimServiceGetQueryResponse {
+  repeated Query query_responses = 1;
+}

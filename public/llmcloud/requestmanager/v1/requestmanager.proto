@@ -1,0 +1,117 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the Inference API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.requestmanager.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+// TODO: add example values and explanatory comments
+
+service RequestManagerService {
+  // completes text based on query and get back a stream of tokens
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  rpc GetTextCompletionStream(GetTextCompletionRequest) returns (stream GetTextCompletionStreamResponse) {
+    option (google.api.http) = {
+      post: "/v1/request_manager/text_completion"
+      body: "*"
+    };
+  }
+
+  // completes text based on query and get back a message with the full response
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  rpc GetTextCompletion(GetTextCompletionRequest) returns (GetTextCompletionResponse) {
+    option (google.api.http) = {
+      post: "/v1/request_manager/text_completion_full"
+      body: "*"
+    };
+  }
+}
+
+message GetTextCompletionStreamResponse {
+  // request_id will only be included in the first response
+  optional string request_id = 1;
+  // the newly generated token data
+  optional string content = 2;
+  optional PerformanceStats stats = 3;
+}
+
+message GetTextCompletionRequest {
+  option (buf.validate.message).cel = {
+    id: "get_text_completion_request.query_length",
+    message: "user_prompt length plus system_prompt length must be less than 65536",
+    expression: "size(this.user_prompt) + size(this.system_prompt) < 65536"
+  };
+
+  message HistoryMessage {
+    // the user message: stringified tokens
+    string user_prompt = 1;
+  
+    // the assistant message: stringified tokens
+    string assistant_response = 2;
+  }
+
+  // the UID of the model to run this request against
+  string model_id = 1 [(buf.validate.field).required = true];
+
+  // the prompt that the system will use to define its response behavior
+  optional string system_prompt = 2;
+
+  // All of the messages in this chat so far
+  repeated HistoryMessage history = 3;
+
+  // the prompt provided by the user
+  string user_prompt = 4 [(buf.validate.field).required = true];
+
+  // the seed to use when generating tokens
+  // Randomization seed for the RNG when doing distribution sampling
+  optional uint32 seed = 5;
+
+  // the maximum amount of tokens to generate before terminating
+  optional uint32 max_tokens = 6;
+
+  // controls the randomness of the response
+  // Lower temperature is lower randomness
+  // range(0,2]
+  optional float temperature = 7 [(buf.validate.field).float = {
+    gt: 0,
+    lte: 2
+  }];
+
+  // controls the top percentile of tokens that are eligible to be sampled
+  // range[0,1]
+  optional float top_p = 8 [(buf.validate.field).float = {
+    gte: 0,
+    lte: 1
+  }];
+
+  // controls the top k most likely tokens that are eligible to be sampled
+  optional uint32 top_k = 9 [(buf.validate.field).uint32 = {
+    gte: 0,
+    lte: 32000
+  }];
+}
+
+message GetTextCompletionResponse {
+  string request_id = 1;
+  // the full response
+  string content = 2;
+  PerformanceStats stats = 3;
+}
+
+
+message PerformanceStats {
+  // the total generation time to this point in the stream. In seconds
+  double time_generated = 1;
+  // total number of tokens generated to this point in the stream
+  uint32 tokens_generated = 2;
+  // the processing time to generate the first token. In seconds
+  double time_processed = 3;
+  // total number of tokens processed as input for this stream
+  uint32 tokens_processed = 4;
+}

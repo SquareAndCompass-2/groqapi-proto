@@ -1,0 +1,31 @@
+// Copyright 2023 Groq Inc.
+// All Rights Reserved.
+//
+// Definition of the QueueManager API Service.
+
+syntax = "proto3";
+
+package public.llmcloud.queuestatemanager.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+service QueueStateManagerService {
+  // Returns the request's place in the queue
+  rpc GetRequestState(GetRequestStateRequest) returns (GetRequestStateResponse) {
+    option (google.api.http) = {get: "/v1/queue_state_manager/request_state/{id}"};
+  }
+}
+
+message GetRequestStateRequest {
+  // the ID of the request
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message GetRequestStateResponse {
+  // the ID of the request
+  string id = 1;
+
+  // How many requests are in front of this request in the queue
+  int32 place_in_queue = 2;
+}
