@@ -41,6 +41,8 @@ message Query {
   string response_address = 8;
   // the model to use
   string model_id = 9;
+  // user id
+  string user_id = 10;
 }
 
 message ShimServiceGetQueryResponse {

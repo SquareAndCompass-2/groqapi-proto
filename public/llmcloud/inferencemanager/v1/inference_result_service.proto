@@ -9,13 +9,17 @@ syntax = "proto3";
 package public.llmcloud.inferencemanager.v1;
 
 import "google/protobuf/duration.proto";
+import "private/llmcloud/responsemanager/v1/responsemanager.proto";
 
 service InferenceResultService {
   // returns the query at the the top of the priority queue
   rpc GetResult(stream InferenceResultServiceGetResultRequest) returns (InferenceResultServiceGetResultResponse) {}
+  rpc AlertBadStatus(AlertBadStatusRequest) returns (AlertBadStatusResponse) {}
 }
 
 message InferenceResultServiceGetResultResponse {}
+
+message AlertBadStatusResponse{}
 
 message ProcessingStats {
   // total number of tokens processed
@@ -25,7 +29,6 @@ message ProcessingStats {
   google.protobuf.Duration process_time = 2;
 }
 
-
 message GenerationStats {
   // total number of tokens generated
   uint32 tokens_generated = 1;
@@ -33,7 +36,6 @@ message GenerationStats {
   // time in millis it took to generate the response tokens
   google.protobuf.Duration generate_time = 2;
 }
-
 
 message InferenceResultServiceGetResultRequest {
   // the newly generated token data
@@ -56,4 +58,14 @@ message InferenceResultServiceGetResultRequest {
 
   // Model to use
   string model_id = 7;
+}
+
+message AlertBadStatusRequest {
+  // the ID of the request
+  string request_id = 1;
+  // response address
+  string response_address = 2;
+  // The status of the request
+  private.llmcloud.responsemanager.v1.RequestStatus status = 3;
+
 }

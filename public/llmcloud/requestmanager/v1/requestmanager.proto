@@ -10,8 +10,6 @@ package public.llmcloud.requestmanager.v1;
 import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
 
-// TODO: add example values and explanatory comments
-
 service RequestManagerService {
   // completes text based on query and get back a stream of tokens
   // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
@@ -44,14 +42,14 @@ message GetTextCompletionStreamResponse {
 message GetTextCompletionRequest {
   option (buf.validate.message).cel = {
     id: "get_text_completion_request.query_length",
-    message: "user_prompt length plus system_prompt length must be less than 65536",
-    expression: "size(this.user_prompt) + size(this.system_prompt) < 65536"
+    message: "user_prompt length plus system_prompt length must be less than 262144",
+    expression: "size(this.user_prompt) + size(this.system_prompt) < 262144"
   };
 
   message HistoryMessage {
     // the user message: stringified tokens
     string user_prompt = 1;
-  
+
     // the assistant message: stringified tokens
     string assistant_response = 2;
   }
@@ -73,7 +71,7 @@ message GetTextCompletionRequest {
   optional uint32 seed = 5;
 
   // the maximum amount of tokens to generate before terminating
-  optional uint32 max_tokens = 6;
+  optional uint32 max_tokens = 6 [(buf.validate.field).uint32.lt = 65536];
 
   // controls the randomness of the response
   // Lower temperature is lower randomness
@@ -95,6 +93,24 @@ message GetTextCompletionRequest {
     gte: 0,
     lte: 32000
   }];
+
+  // https://platform.openai.com/docs/api-reference/chat/create#chat-create-frequency_penalty
+  optional float frequency_penalty = 10;
+
+  // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logit_bias
+  map<int32, int32> logit_bias = 11;
+
+  // https://platform.openai.com/docs/api-reference/chat/create#chat-create-n
+  optional uint32 n = 12;
+
+  // https://platform.openai.com/docs/api-reference/chat/create#chat-create-presence_penalty
+  optional float presence_penalty = 13;
+
+  // https://platform.openai.com/docs/api-reference/chat/create#chat-create-stop
+  repeated string stop = 14;
+
+  // The number of tokens to include in the input. Default = model sequence_length * (2/3)
+  optional uint32 max_input_tokens = 15;
 }
 
 message GetTextCompletionResponse {
@@ -103,7 +119,6 @@ message GetTextCompletionResponse {
   string content = 2;
   PerformanceStats stats = 3;
 }
-
 
 message PerformanceStats {
   // the total generation time to this point in the stream. In seconds
