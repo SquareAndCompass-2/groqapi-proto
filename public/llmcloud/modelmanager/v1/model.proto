@@ -50,5 +50,5 @@ message Model {
   ModelDetails details = 2;
   ModelMeta meta = 3;
   // is the model currently being served
-  ModelStatus status = 9;
+  ModelStatus status = 4;
 }
